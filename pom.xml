@@ -1,105 +1,97 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="
-           http://maven.apache.org/POM/4.0.0
-           https://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
 
+  <!-- ==== Project Coordinates ==== -->
   <groupId>com.example</groupId>
   <artifactId>NNDL-5</artifactId>
   <version>1.0.0</version>
-  <name>NNDL-5</name>
   <packaging>jar</packaging>
+  <name>NNDL-5</name>
+  <description>Sample Java project built on Jenkins with Maven</description>
 
+  <!-- ==== Common Properties ==== -->
   <properties>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
+    <!-- Java toolchain -->
+    <maven.compiler.release>17</maven.compiler.release>
+
+    <!-- Encoding -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <!-- Plugin & lib versions -->
+    <maven.compiler.plugin.version>3.13.0</maven.compiler.plugin.version>
+    <maven.surefire.plugin.version>3.2.5</maven.surefire.plugin.version>
+    <maven.jar.plugin.version>3.4.2</maven.jar.plugin.version>
+    <junit.jupiter.version>5.10.2</junit.jupiter.version>
   </properties>
 
+  <!-- ==== Dependencies ==== -->
+  <dependencies>
+    <!-- JUnit 5 test suite -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${junit.jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Add your runtime deps here, for example:
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.14.0</version>
+    </dependency>
+    -->
+  </dependencies>
+
+  <!-- ==== Build Configuration ==== -->
   <build>
     <plugins>
-      <!-- Allow compiling Java sources from the repo root (non-standard layout) -->
+      <!-- Compile with Java 17 -->
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <version>3.6.0</version>
-        <executions>
-          <execution>
-            <id>add-root-as-source</id>
-            <phase>generate-sources</phase>
-            <goals><goal>add-source</goal></goals>
-            <configuration>
-              <sources>
-                <source>.</source>
-              </sources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <!-- Compile -->
-      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.13.0</version>
+        <version>${maven.compiler.plugin.version}</version>
         <configuration>
-          <!-- Keep junk (like target/) out of compilation -->
-          <includes>
-            <include>**/*.java</include>
-          </includes>
-          <excludes>
-            <exclude>target/**</exclude>
-            <exclude>build/**</exclude>
-          </excludes>
+          <!-- 'release' ensures compatible stdlib & flags for the target Java -->
+          <release>${maven.compiler.release}</release>
         </configuration>
       </plugin>
 
-      <!-- Run a class: mvn -Dexec.mainClass=StringManipulations exec:java -->
+      <!-- Modern test runner that supports JUnit 5 & Java 17 -->
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>3.5.1</version>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${maven.surefire.plugin.version}</version>
         <configuration>
-          <classpathScope>compile</classpathScope>
+          <!-- Helps on some JDK 17 modular setups -->
+          <useModulePath>false</useModulePath>
+        </configuration>
+      </plugin>
+
+      <!-- Build a simple runnable jar (no shaded deps) -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>${maven.jar.plugin.version}</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <!-- If you have a main class, set it here -->
+              <!-- <mainClass>com.example.Main</mainClass> -->
+            </manifest>
+          </archive>
         </configuration>
       </plugin>
     </plugins>
   </build>
 
-  <!-- Optional: build a runnable fat JAR when you pass -Pwith-main -DmainClass=YourClass -->
-  <profiles>
-    <profile>
-      <id>with-main</id>
-      <activation>
-        <property>
-          <name>mainClass</name>
-        </property>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <artifactId>maven-assembly-plugin</artifactId>
-            <version>3.6.0</version>
-            <executions>
-              <execution>
-                <id>make-assembly</id>
-                <phase>package</phase>
-                <goals><goal>single</goal></goals>
-                <configuration>
-                  <descriptorRef>jar-with-dependencies</descriptorRef>
-                  <finalName>${project.artifactId}-${project.version}</finalName>
-                  <archive>
-                    <manifest>
-                      <mainClass>${mainClass}</mainClass>
-                    </manifest>
-                  </archive>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
+  <!-- ==== (Optional) Maven Wrapper for Reproducibility ====
+  You can generate a Maven Wrapper (mvnw) locally with:
+  mvn -N io.takari:maven:wrapper -Dmaven=3.9.9
+  -->
+
 </project>
